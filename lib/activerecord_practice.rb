@@ -17,11 +17,67 @@ class Customer < ActiveRecord::Base
   #  You should NOT need to call Ruby library functions for sorting, filtering, etc.
 
   def self.any_candice
-    # YOUR CODE HERE to return all customer(s) whose first name is Candice
-    # probably something like:  Customer.where(....)
+    Customer.where(first: 'Candice')
+    
   end
   def self.with_valid_email
-    # YOUR CODE HERE to return only customers with valid email addresses (containing '@')
+    Customer.where("email LIKE?","%@%")
   end
+
+  def self.with_dot_org_email
+    Customer.where("email LIKE?","%.org") # %ใช้แทนเป็นตัวค้นหาว่า หลังstring % มี .org อยู่ไหม
+  end
+
+  def self.with_invalid_email
+    Customer.where("email NOT LIKE?","%@%")
+  end
+
+  def self.with_blank_email
+    Customer.where('email IS NULL')
+  end
+
+  def self.born_before_1980
+    Customer.where("birthdate < ?", Date.new(1980, 1, 1))
+  end
+
+  def self.with_valid_email_and_born_before_1980
+    Customer.where("email LIKE ? AND birthdate < ?", "%@%", Date.new(1980, 1, 1))
+  end
+
+  def self.last_names_starting_with_b
+    Customer.where("last LIKE?","B%").order(:birthdate)
+  end
+
+
+  # Without Where
+
+  def self.twenty_youngest
+    Customer.order(birthdate: :desc).limit(20) #descending จาก มากไปน้อย
+  end
+
+  #Update
+
+  def self.update_gussie_murray_birthdate
+    user = Customer.find_by(first: 'Gussie', last: 'Murray')
+    user.update(birthdate: Time.parse('2004-02-08'))          # prase เป็นการแปลง string ให้เป็น DateTime
+  end
+
+  def self.change_all_invalid_emails_to_blank
+    all_user = Customer.where("email NOT LIKE ?", "%@%" )
+    all_user.update(email: "")
+
+  end
+
+  def self.delete_meggie_herman
+    user = Customer.find_by(first: 'Meggie', last: 'Herman')
+    user.delete
+  end
+
+  def self.delete_everyone_born_before_1978
+    customers = Customer.where('birthdate < ?', Time.parse("1978-01-01"))
+    customers.each(&:destroy)
+  end
+
+
   # etc. - see README.md for more details
 end
